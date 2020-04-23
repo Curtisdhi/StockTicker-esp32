@@ -40,16 +40,20 @@ class Display {
     private:
         int bcdDigits[4];
         byte digitIndex;
-        
+        String value;
+        boolean isDirty;
+
         unsigned long bcdLastDigitDisplay;
         unsigned long bcdLastDisplay;
 
     public:
-        short value = 0;
+        
 
         void setup();
         void update(unsigned long *milliseconds);
         void displayDigit();
-        void getDigitsForBCD(int value, byte index);
+        void getDigitsForBCD(String value);
         void blankBCD();
+        int convertCharToBCD(char data); 
+        void setValue(String value);
 };
