@@ -10,7 +10,7 @@ const String PASSWORD_EEPROM_ADDR = "W_PASS";
 const long UPDATE_RATE = 60000;
 const byte MAX_TRIES = 20;
 
-const String API_URL = "https://financialmodelingprep.com/api/v3/quote/AMD";
+const String API_URL = "https://financialmodelingprep.com/api/v3/quote/AMD?apikey=678874e6accbbc37fc94ef942c8a2315";
 
 class Network {
     private:
