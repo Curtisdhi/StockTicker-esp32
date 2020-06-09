@@ -5,10 +5,12 @@ void Network::setup() {
     preferences.begin("network", false);
     this->ssid = preferences.getString(SSID_EEPROM_ADDR.c_str(), "");
     this->password = preferences.getString(PASSWORD_EEPROM_ADDR.c_str(), "");
+    this->apiKey = preferences.getString(APIKEY_EEPROM_ADDR.c_str(), "");
     preferences.end();
 
     Serial.println("Type c to configure WIFI.");
     Serial.println("Configured for: "+ this->ssid ?: "N/A");
+    Serial.println("Type a to configure API key.");
 }
 
 void Network::update(unsigned long *milliseconds) {
@@ -49,6 +51,18 @@ void Network::handleUserInput() {
                     this->fetchStockValue();
                 }
                 break;
+            case 'a':
+                Serial.setTimeout(10000);
+                Serial.println("Configuring API...");
+                Serial.println("Enter API Key:");
+
+                this->apiKey = Serial.readStringUntil('\n');
+                this->apiKey.trim();
+                Serial.println("API key: "+ this->apiKey);
+
+                preferences.begin("network", false);
+                preferences.putString(APIKEY_EEPROM_ADDR.c_str(), this->apiKey);
+                preferences.end();
             default: break;
         }
     }
@@ -85,13 +99,18 @@ void Network::disconnect() {
 }
 
 void Network::fetchStockValue() {
+    if (this->apiKey == NULL) {
+        Serial.println("Api key has not been configured. Press a to configure.");
+        return;
+    }
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("Fetching webpage: "+ API_URL);
+        String apiUrl = API_URL + this->apiKey;
+        Serial.println("Fetching webpage: "+ apiUrl);
 
-        http.begin(API_URL);
+        http.begin(apiUrl);
         int httpCode = http.GET();
         if (httpCode > 0) {  
-            this->response = this->getStockFromCSV(http.getString());
+            this->response = this->getStockFromJSON(http.getString());
             
             b_hasResponse = true;
 
@@ -102,14 +121,14 @@ void Network::fetchStockValue() {
     }
 }
 
-String Network::getStockFromCSV(String data) {
-    const byte COLONS_TO_SEARCH = 3;
+String Network::getStockFromJSON(String data) {
+    const byte COLONS_TO_SEARCH = 1;
     String result = "";
-    for (int strIndex = 0, commaIndex = 0; strIndex < data.length(); strIndex++) {
+    for (int strIndex = 0, colonIndex = 0; strIndex < data.length(); strIndex++) {
         char d = data[strIndex];
         if (d == ':') {
-            commaIndex++;
-        } else if (commaIndex == COLONS_TO_SEARCH) {
+            colonIndex++;
+        } else if (colonIndex == COLONS_TO_SEARCH) {
             if (d == ',') {
                 break;
             }

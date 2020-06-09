@@ -6,11 +6,12 @@
 
 const String SSID_EEPROM_ADDR = "W_SSID";
 const String PASSWORD_EEPROM_ADDR = "W_PASS";
+const String APIKEY_EEPROM_ADDR = "W_APIKEY";
 
 const long UPDATE_RATE = 60000;
 const byte MAX_TRIES = 20;
 
-const String API_URL = "https://financialmodelingprep.com/api/v3/quote/AMD?apikey=678874e6accbbc37fc94ef942c8a2315";
+const String API_URL = "https://finnhub.io/api/v1/quote?symbol=AMD&token=";
 
 class Network {
     private:
@@ -18,6 +19,7 @@ class Network {
         HTTPClient http;
         String ssid;
         String password;
+        String apiKey;
         unsigned long lastUpdate;
         String response;
         boolean b_hasResponse;
@@ -29,7 +31,7 @@ class Network {
         boolean connect();
         void disconnect();
         void fetchStockValue();
-        String getStockFromCSV(String data);
+        String getStockFromJSON(String data);
         String getResponse();
         boolean hasResponse();
 };
