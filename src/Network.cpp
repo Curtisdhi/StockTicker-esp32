@@ -124,12 +124,27 @@ void Network::fetchStockValue() {
 String Network::getStockFromJSON(String data) {
     const byte COLONS_TO_SEARCH = 1;
     String result = "";
+    byte decPlace = 0;
+    bool foundDec = false;
     for (int strIndex = 0, colonIndex = 0; strIndex < data.length(); strIndex++) {
         char d = data[strIndex];
         if (d == ':') {
             colonIndex++;
         } else if (colonIndex == COLONS_TO_SEARCH) {
+            //need to handle more than 2 decimal places
+            if (foundDec) {
+                decPlace++;
+                if (decPlace > 2) {
+                    break;
+                }
+            }
+            if (d == '.') {
+                foundDec = true;
+            }
             if (d == ',') {
+                if (decPlace == 2) {
+                    result += '0';
+                }
                 break;
             }
             if (d != 0x20) {
@@ -137,8 +152,7 @@ String Network::getStockFromJSON(String data) {
             }
         }
     }
-
-    return result.substring(0, result.length() - 6);
+    return result;
 }
 
 String Network::getResponse() {
