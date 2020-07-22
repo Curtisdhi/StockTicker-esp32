@@ -152,6 +152,11 @@ String Network::getStockFromJSON(String data) {
             }
         }
     }
+
+    if (!decPlace) {
+        result += ".00";
+    }
+
     return result;
 }
 
